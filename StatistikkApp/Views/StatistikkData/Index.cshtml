@@ -71,3 +71,36 @@
 }
     </tbody>
 </table>
+<canvas id="myChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var labels = [
+        @foreach (var item in Model)
+        {
+            <text>'@item.Aar',</text>
+        }
+    ];
+
+    var data = [
+        @foreach (var item in Model)
+        {
+            <text>@item.Verdi,</text>
+        }
+    ];
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Statistikk',
+                data: data,
+                borderWidth: 2
+            }]
+        }
+    });
+</script>
