@@ -20,11 +20,28 @@ namespace StatistikkApp.Controllers
         }
 
         // GET: StatistikkData
-        public async Task<IActionResult> Index()
-        {
-            var applicationDbContext = _context.StatistikkData.Include(s => s.Kommune).Include(s => s.StatistikkKategori);
-            return View(await applicationDbContext.ToListAsync());
-        }
+        public async Task<IActionResult> Index(int? kommuneId, int? kategoriId)
+{
+    ViewData["KommuneId"] = new SelectList(_context.Kommuner, "Id", "Navn", kommuneId);
+    ViewData["KategoriId"] = new SelectList(_context.StatistikkKategorier, "Id", "Navn", kategoriId);
+
+    var statistikk = _context.StatistikkData
+        .Include(s => s.Kommune)
+        .Include(s => s.StatistikkKategori)
+        .AsQueryable();
+
+    if (kommuneId.HasValue)
+    {
+        statistikk = statistikk.Where(s => s.KommuneId == kommuneId.Value);
+    }
+
+    if (kategoriId.HasValue)
+    {
+        statistikk = statistikk.Where(s => s.StatistikkKategoriId == kategoriId.Value);
+    }
+
+    return View(await statistikk.ToListAsync());
+}
 
         // GET: StatistikkData/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -49,7 +66,7 @@ namespace StatistikkApp.Controllers
         // GET: StatistikkData/Create
         public IActionResult Create()
         {
-            ViewData["KommuneId"] = new SelectList(_context.Kommuner, "Id", "KommuneNummer");
+            ViewData["KommuneId"] = new SelectList(_context.Kommuner, "Id", "Navn");
             ViewData["StatistikkKategoriId"] = new SelectList(_context.StatistikkKategorier, "Id", "Navn");
             return View();
         }

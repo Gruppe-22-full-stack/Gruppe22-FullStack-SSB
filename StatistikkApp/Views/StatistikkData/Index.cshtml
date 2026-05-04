@@ -5,6 +5,26 @@
 }
 
 <h1>Index</h1>
+<form asp-action="Index" method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label class="form-label">Kommune</label>
+        <select name="kommuneId" class="form-select" asp-items="ViewBag.KommuneId">
+            <option value="">Alle kommuner</option>
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Kategori</label>
+        <select name="kategoriId" class="form-select" asp-items="ViewBag.KategoriId">
+            <option value="">Alle kategorier</option>
+        </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+        <a asp-action="Index" class="btn btn-secondary">Nullstill</a>
+    </div>
+</form>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -37,7 +57,7 @@
                 @Html.DisplayFor(modelItem => item.Verdi)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Kommune.KommuneNummer)
+                @Html.DisplayFor(modelItem => item.Kommune.Navn)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.StatistikkKategori.Navn)
