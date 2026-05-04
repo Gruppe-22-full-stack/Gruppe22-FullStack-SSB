@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "StatistikkApp/1.0.0": {
+        "runtime": {
+          "StatistikkApp.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "StatistikkApp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
