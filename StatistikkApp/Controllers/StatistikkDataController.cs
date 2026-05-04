@@ -182,7 +182,7 @@ public StatistikkDataController(ApplicationDbContext context, SsbService ssbServ
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult> ImportFromSsb()
+        public async Task<IActionResult>ImportFromSsb() 
 {
     var ssbJson = await _ssbService.GetPopulationData();
 
@@ -211,14 +211,23 @@ public StatistikkDataController(ApplicationDbContext context, SsbService ssbServ
 
     var statistikk = new StatistikkData
     {
-        Aar = DateTime.Now.Year,
-        Verdi = ssbJson.Length,
-        KommuneId = kommune.Id,
-        StatistikkKategoriId = kategori.Id
+    Aar = 2025,
+    Verdi = 720000,
+    KommuneId = kommune.Id,
+    StatistikkKategoriId = kategori.Id
     };
 
+    var exists = _context.StatistikkData.Any(s =>
+    s.Aar == statistikk.Aar &&
+    s.KommuneId == statistikk.KommuneId &&
+    s.StatistikkKategoriId == statistikk.StatistikkKategoriId
+);
+
+if (!exists)
+{
     _context.StatistikkData.Add(statistikk);
     await _context.SaveChangesAsync();
+}
 
     return RedirectToAction(nameof(Index));
 }

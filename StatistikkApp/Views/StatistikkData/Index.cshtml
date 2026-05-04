@@ -5,6 +5,7 @@
 }
 
 <h1>Index</h1>
+
 <form asp-action="Index" method="get" class="row g-3 mb-4">
     <div class="col-md-4">
         <label class="form-label">Kommune</label>
@@ -26,43 +27,31 @@
     </div>
 </form>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-    <a asp-action="ImportFromSsb" class="btn btn-success">Hent data fra SSB</a>
+<p class="mt-3">
+    <a asp-action="Create" class="btn btn-primary me-2">Create New</a>
+    <a asp-action="ImportFromSsb" class="btn btn-success">Oppdater fra SSB</a>
 </p>
+
+<h2 class="mt-4">Statistikkdata</h2>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Aar)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Verdi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Kommune)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StatistikkKategori)
-            </th>
+            <th>År</th>
+            <th>Verdi</th>
+            <th>Kommune</th>
+            <th>Kategori</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model)
+{
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Aar)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Verdi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Kommune.Navn)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StatistikkKategori.Navn)
-            </td>
+            <td>@item.Aar</td>
+            <td>@item.Verdi.ToString("N0")</td>
+            <td>@item.Kommune.Navn</td>
+            <td>@item.StatistikkKategori.Navn</td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
@@ -72,25 +61,27 @@
 }
     </tbody>
 </table>
+
 <h3 class="mt-4">Utvikling over tid</h3>
 <p>Grafen viser statistikkdata sortert etter år.</p>
+
 <canvas id="myChart" width="400" height="200"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     var labels = [
-        @foreach (var item in Model)
-        {
-            <text>'@item.Aar',</text>
-        }
+@foreach (var item in Model)
+{
+    <text>'@item.Aar',</text>
+}
     ];
 
     var data = [
-        @foreach (var item in Model)
-        {
-            <text>@item.Verdi,</text>
-        }
+@foreach (var item in Model)
+{
+    <text>@item.Verdi,</text>
+}
     ];
 
     var ctx = document.getElementById('myChart').getContext('2d');
@@ -100,10 +91,19 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Befolkning i Oslo',
+                label: 'Befolkning (valgt kommune)',
                 data: data,
-                borderWidth: 2
+                borderWidth: 2,
+                tension: 0.4
             }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
         }
     });
 </script>
