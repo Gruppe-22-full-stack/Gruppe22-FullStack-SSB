@@ -29,9 +29,10 @@ public StatistikkDataController(ApplicationDbContext context, SsbService ssbServ
     ViewData["KategoriId"] = new SelectList(_context.StatistikkKategorier, "Id", "Navn", kategoriId);
 
     var statistikk = _context.StatistikkData
-        .Include(s => s.Kommune)
-        .Include(s => s.StatistikkKategori)
-        .AsQueryable();
+    .Include(s => s.Kommune)
+    .Include(s => s.StatistikkKategori)
+    .OrderBy(s => s.Aar)
+    .AsQueryable();
 
     if (kommuneId.HasValue)
     {
