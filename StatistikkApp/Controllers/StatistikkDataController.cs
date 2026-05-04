@@ -1,3 +1,4 @@
+using StatistikkApp.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,13 @@ namespace StatistikkApp.Controllers
     public class StatistikkDataController : Controller
     {
         private readonly ApplicationDbContext _context;
+private readonly SsbService _ssbService;
 
-        public StatistikkDataController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+public StatistikkDataController(ApplicationDbContext context, SsbService ssbService)
+{
+    _context = context;
+    _ssbService = ssbService;
+}
 
         // GET: StatistikkData
         public async Task<IActionResult> Index(int? kommuneId, int? kategoriId)
@@ -178,6 +181,46 @@ namespace StatistikkApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        public async Task<IActionResult> ImportFromSsb()
+{
+    var ssbJson = await _ssbService.GetPopulationData();
+
+    var kommune = await _context.Kommuner.FirstOrDefaultAsync(k => k.KommuneNummer == "0301");
+    if (kommune == null)
+    {
+        kommune = new Kommune
+        {
+            Navn = "Oslo",
+            KommuneNummer = "0301"
+        };
+        _context.Kommuner.Add(kommune);
+        await _context.SaveChangesAsync();
+    }
+
+    var kategori = await _context.StatistikkKategorier.FirstOrDefaultAsync(k => k.Navn == "Befolkning");
+    if (kategori == null)
+    {
+        kategori = new StatistikkKategori
+        {
+            Navn = "Befolkning"
+        };
+        _context.StatistikkKategorier.Add(kategori);
+        await _context.SaveChangesAsync();
+    }
+
+    var statistikk = new StatistikkData
+    {
+        Aar = DateTime.Now.Year,
+        Verdi = ssbJson.Length,
+        KommuneId = kommune.Id,
+        StatistikkKategoriId = kategori.Id
+    };
+
+    _context.StatistikkData.Add(statistikk);
+    await _context.SaveChangesAsync();
+
+    return RedirectToAction(nameof(Index));
+}
 
         private bool StatistikkDataExists(int id)
         {
