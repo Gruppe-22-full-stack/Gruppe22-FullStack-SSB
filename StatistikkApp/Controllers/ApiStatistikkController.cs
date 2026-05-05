@@ -16,14 +16,22 @@ namespace StatistikkApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var data = await _context.StatistikkData
-                .Include(s => s.Kommune)
-                .Include(s => s.StatistikkKategori)
-                .ToListAsync();
+    public async Task<IActionResult> Get()
+    {
+        var data = await _context.StatistikkData
+            .Include(s => s.Kommune)
+            .Include(s => s.StatistikkKategori)
+            .Select(s => new
+            {
+                s.Id,
+                s.Aar,
+                s.Verdi,
+                Kommune = s.Kommune.Navn,
+                Kategori = s.StatistikkKategori.Navn
+            })
+            .ToListAsync();
 
-            return Ok(data);
-        }
+        return Ok(data);
+    }
     }
 }
