@@ -92,7 +92,7 @@ Testbruker:
 
 E-post: test@test.no
 
-Passord: Test123
+Passord: Test123!
 
 
 
@@ -149,6 +149,4 @@ Prosjektet bruker:
 
 
 Utvikling ble gjort på dev og extraFeature før merge til main.
-
-
 
