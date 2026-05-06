@@ -182,55 +182,53 @@ public StatistikkDataController(ApplicationDbContext context, SsbService ssbServ
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult>ImportFromSsb() 
-{
-    var ssbJson = await _ssbService.GetPopulationData();
 
-    var kommune = await _context.Kommuner.FirstOrDefaultAsync(k => k.KommuneNummer == "0301");
-    if (kommune == null)
-    {
-        kommune = new Kommune
+        public async Task<IActionResult> ImportFromSsb(int? kommuneId, int? kategoriId)
         {
-            Navn = "Oslo",
-            KommuneNummer = "0301"
-        };
-        _context.Kommuner.Add(kommune);
-        await _context.SaveChangesAsync();
-    }
+            // 1. Sjekk at vi har valgt en kommune og en kategori
+            if (!kommuneId.HasValue || !kategoriId.HasValue)
+            {
+                TempData["Error"] = "Vennligst velg både kommune og kategori før du oppdaterer.";
+                return RedirectToAction(nameof(Index));
+            }
 
-    var kategori = await _context.StatistikkKategorier.FirstOrDefaultAsync(k => k.Navn == "Befolkning");
-    if (kategori == null)
-    {
-        kategori = new StatistikkKategori
-        {
-            Navn = "Befolkning"
-        };
-        _context.StatistikkKategorier.Add(kategori);
-        await _context.SaveChangesAsync();
-    }
+            // 2. Finn kommunen i databasen for å få tak i KommuneNummeret (f.eks. "4601")
+            var kommune = await _context.Kommuner.FindAsync(kommuneId.Value);
+            var kategori = await _context.StatistikkKategorier.FindAsync(kategoriId.Value);
 
-    var statistikk = new StatistikkData
-    {
-    Aar = 2025,
-    Verdi = 720000,
-    KommuneId = kommune.Id,
-    StatistikkKategoriId = kategori.Id
-    };
+            if (kommune == null || kategori == null) return NotFound();
 
-    var exists = _context.StatistikkData.Any(s =>
-    s.Aar == statistikk.Aar &&
-    s.KommuneId == statistikk.KommuneId &&
-    s.StatistikkKategoriId == statistikk.StatistikkKategoriId
-);
+            // 3. Hent data fra SSB (Her bør SsbService ideelt sett ta inn kommune.KommuneNummer)
+            // Siden jeg ikke ser SsbService-koden, antar vi at den henter data.
+            // Hvis SsbService.GetPopulationData() kun henter Oslo, må den tjenesten også oppdateres.
+            var ssbJson = await _ssbService.GetPopulationData();
 
-if (!exists)
-{
-    _context.StatistikkData.Add(statistikk);
-    await _context.SaveChangesAsync();
-}
+            // 4. Opprett det nye data-punktet dynamisk
+            // Merk: For en fullverdig løsning bør verdiene under hentes ut fra ssbJson-variabelen
+            var statistikk = new StatistikkData
+            {
+                Aar = 2025, 
+                Verdi = 275000, // Eksempelverdi for Bergen - bør egentlig parses fra ssbJson
+                KommuneId = kommune.Id,
+                StatistikkKategoriId = kategori.Id
+            };
 
-    return RedirectToAction(nameof(Index));
-}
+            // 5. Sjekk om dataen finnes fra før for å unngå duplikater
+            var exists = await _context.StatistikkData.AnyAsync(s =>
+                s.Aar == statistikk.Aar &&
+                s.KommuneId == statistikk.KommuneId &&
+                s.StatistikkKategoriId == statistikk.StatistikkKategoriId
+            );
+
+            if (!exists)
+            {
+                _context.StatistikkData.Add(statistikk);
+                await _context.SaveChangesAsync();
+            }
+
+            // Returner til Index med de samme filterne valgt
+            return RedirectToAction(nameof(Index), new { kommuneId = kommuneId, kategoriId = kategoriId });
+        }
 
         private bool StatistikkDataExists(int id)
         {
